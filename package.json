@@ -1,5 +1,5 @@
 {
-  "homepage":"http://kiranpuli.github.io/coronaUpdatesDashboard",
+  "homepage": "http://kiranpuli.github.io/coronaUpdatesDashboard",
   "name": "corona-updates",
   "version": "1.0.0",
   "description": "",
@@ -7,7 +7,9 @@
   "main": "src/index.js",
   "dependencies": {
     "axios": "0.19.2",
+    "chart.js": "^2.9.3",
     "react": "16.12.0",
+    "react-chartjs-2": "^2.9.0",
     "react-dom": "16.12.0",
     "react-scripts": "^3.4.1"
   },
@@ -16,8 +18,8 @@
     "typescript": "3.3.3"
   },
   "scripts": {
-    "predeploy":"npm run build",
-    "deploy":"gh-pages -d build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
