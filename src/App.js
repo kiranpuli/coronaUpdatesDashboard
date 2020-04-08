@@ -114,10 +114,11 @@ export default class App extends React.Component {
         <h1 className="jumbotron text-center bg-dark ">
           Corona-Virus Outbreak Dashboard
         </h1>
-        {/* <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
+        <h3 className="text-center btn-block">{this.state.cc} Statistics</h3>
+        <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
         <option defaultValue> WorldWide </option> 
         {this.getCountries()}
-        </select> */}
+        </select>
         <div className="row ">
           <div className="col-md-4">
             <div className="card text-white bg-warning mb-3 p-5">
@@ -145,11 +146,7 @@ export default class App extends React.Component {
           </div>
         </div>
         <div className="mt-3">
-        <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
-        <option defaultValue hidden> WorldWide </option> 
-        {this.getCountries()}
-        </select>
-        <h3 className="text-center btn-block">{this.state.cc} Statistics</h3>
+        
         <Bar
           data={this.state.g.data}
           options={options}
