@@ -1,6 +1,6 @@
 import React from "react";
 import Axios from "axios";
-import {Line, Bar} from "react-chartjs-2";
+import { Bar} from "react-chartjs-2";
 import "./styles.css";
 import Foot from "./components/Foot"
 
@@ -8,6 +8,8 @@ export default class App extends React.Component {
   constructor(){
     super()
     this.getCountryData=this.getCountryData.bind(this);
+    this.getData=this.getData.bind(this);
+    
   }
   state = {
     confirmed: 0,
@@ -34,7 +36,8 @@ export default class App extends React.Component {
       ]
       }
     },
-    countries: []
+    countries: [],
+    cc:"WorldWide"
   };
   componentDidMount() {
     this.getData();
@@ -43,22 +46,21 @@ export default class App extends React.Component {
     const defaultRes = await Axios.get("https://covid19.mathdro.id/api");
     const resCountries= await Axios.get("https://covid19.mathdro.id/api/countries")
     const graph = await Axios.get("https://covid19.mathdro.id/api/daily")
-    // console.log(graph)
-    resCountries.data.countries.map((value, i)=>{return this.state.countries.push(value['name'])})
+    resCountries.data.countries.map((value)=>{return this.state.countries.push(value['name'])})
     this.setState({
       confirmed: defaultRes.data.confirmed.value,
       recovered: defaultRes.data.recovered.value,
       deaths: defaultRes.data.deaths.value,
+      cc:"WorldWide"
     });
-
+    
     graph.data.map((i)=>{
       this.state.g.data.labels.push(i.reportDate)
       this.state.g.data.datasets[0].data.push(i.totalConfirmed)
       this.state.g.data.datasets[1].data.push(i.totalRecovered)
       this.state.g.data.datasets[2].data.push(i.deaths.total)
     })
-
-
+    
     
   }
 
@@ -68,24 +70,54 @@ export default class App extends React.Component {
 
    async getCountryData(e){
     const c=e.target.value
-    // console.log(c)
-    const selectedCountry= await Axios.get(`https://covid19.mathdro.id/api/countries/${c}`)
-    this.setState({
-      confirmed: selectedCountry.data.confirmed.value,
-      recovered: selectedCountry.data.recovered.value,
-      deaths: selectedCountry.data.deaths.value,
-    });
+    if(c==="WorldWide"){
+      this.state.g.data.labels=[]
+      this.state.g.data.datasets[0].data=[]
+      this.state.g.data.datasets[1].data=[]
+      this.state.g.data.datasets[2].data=[]
+      this.getData();
+    }
+    else{
+      this.state.g.data.labels=[]
+      this.state.g.data.datasets[0].data=[]
+      this.state.g.data.datasets[1].data=[]
+      this.state.g.data.datasets[2].data=[]
+      fetch("https://pomber.github.io/covid19/timeseries.json")
+      .then(response => response.json())
+      .then(data => {
+        data[c].forEach((i) =>{
+          this.state.g.data.labels.push(i.date)
+          this.state.g.data.datasets[0].data.push(i.confirmed)
+          this.state.g.data.datasets[1].data.push(i.recovered)
+          this.state.g.data.datasets[2].data.push(i.deaths)
+        })
+      })
+      const selectedCountry= await Axios.get(`https://covid19.mathdro.id/api/countries/${c}`)
+      this.setState({
+        confirmed: selectedCountry.data.confirmed.value,
+        recovered: selectedCountry.data.recovered.value,
+        deaths: selectedCountry.data.deaths.value,
+        cc:c
+      });
+
+    }
   }
   render() {
+
+    const options = {
+      maintainAspectRatio: true,	// Don't maintain w/h ratio
+      responsive:true
+    }
+
     return (
       <div className="text-danger">
-        <h1 className="text-center bg-dark ">
+        <h1 className="jumbotron text-center bg-dark ">
           Corona-Virus Outbreak Dashboard
         </h1>
-        <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
+        {/* <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
         <option defaultValue> WorldWide </option> 
         {this.getCountries()}
-        </select>
+        </select> */}
         <div className="row ">
           <div className="col-md-4">
             <div className="card text-white bg-warning mb-3 p-5">
@@ -112,15 +144,22 @@ export default class App extends React.Component {
             </div>
           </div>
         </div>
-        <div>
-          <h3 className="text-center btn-block">WorldWide Statistics</h3>
+        <div className="mt-3">
+        <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
+        <option defaultValue hidden> WorldWide </option> 
+        {this.getCountries()}
+        </select>
+        <h3 className="text-center btn-block">{this.state.cc} Statistics</h3>
         <Bar
           data={this.state.g.data}
-          height={100}
-          responsive={true}
-          duration={5000}
+          options={options}
         />
+
+        <div class="alert alert-warning" role="alert">
+          Try re-sizing the window ( for pc ) / rotating device ( mobile ) if graph is not showing up
         </div>
+        </div>
+        
         <Foot/>
       </div>
     );
