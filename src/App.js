@@ -41,10 +41,11 @@ export default class App extends React.Component {
   };
   componentDidMount() {
     this.getData();
+    console.log(this.state.cc,this.state.g.data.datasets)
   }
   async getData() {
-    const defaultRes = await Axios.get("https://covid19.mathdro.id/api");
     const resCountries= await Axios.get("https://covid19.mathdro.id/api/countries")
+    const defaultRes = await Axios.get("https://covid19.mathdro.id/api");
     const graph = await Axios.get("https://covid19.mathdro.id/api/daily")
     resCountries.data.countries.map((value)=>{return this.state.countries.push(value['name'])})
     this.setState({
@@ -75,7 +76,21 @@ export default class App extends React.Component {
       this.state.g.data.datasets[0].data=[]
       this.state.g.data.datasets[1].data=[]
       this.state.g.data.datasets[2].data=[]
-      this.getData();
+      const graph = await Axios.get("https://covid19.mathdro.id/api/daily")
+      graph.data.map((i)=>{
+        this.state.g.data.labels.push(i.reportDate)
+        this.state.g.data.datasets[0].data.push(i.totalConfirmed)
+        this.state.g.data.datasets[1].data.push(i.totalRecovered)
+        this.state.g.data.datasets[2].data.push(i.deaths.total)
+      })
+      const defaultRes = await Axios.get("https://covid19.mathdro.id/api");
+      this.setState({
+        confirmed: defaultRes.data.confirmed.value,
+        recovered: defaultRes.data.recovered.value,
+        deaths: defaultRes.data.deaths.value,
+        cc:"WorldWide"
+      });
+      // console.log(this.state.cc,this.state.g.data.datasets)
     }
     else{
       this.state.g.data.labels=[]
@@ -99,14 +114,14 @@ export default class App extends React.Component {
         deaths: selectedCountry.data.deaths.value,
         cc:c
       });
-
+      // console.log(this.state.cc,this.state.g.data.datasets)
     }
   }
   render() {
 
     const options = {
-      maintainAspectRatio: true,	// Don't maintain w/h ratio
-      responsive:true
+      // maintainAspectRatio: true,	// Don't maintain w/h ratio
+      // responsive:true
     }
 
     return (
@@ -116,7 +131,7 @@ export default class App extends React.Component {
         </h1>
         <h3 className="text-center btn-block">{this.state.cc} Statistics</h3>
         <select className="form-control w-50 mt-3 mb-3" onChange={this.getCountryData}>
-        <option defaultValue> WorldWide </option> 
+        <option defaultValue > WorldWide </option> 
         {this.getCountries()}
         </select>
         <div className="row ">
@@ -145,17 +160,19 @@ export default class App extends React.Component {
             </div>
           </div>
         </div>
-        <div className="mt-3">
         
-        <Bar
-          data={this.state.g.data}
-          options={options}
-        />
-
-        <div class="alert alert-warning" role="alert">
-          Try re-sizing the window ( for pc ) / rotating device ( mobile ) if graph is not showing up
-        </div>
-        </div>
+          <div className="mt-3">
+            <Bar
+              data={this.state.g.data}
+              options={options}
+            />
+    
+            <div className="alert alert-warning" role="alert">
+              Try re-sizing the window ( for pc ) / rotating device ( mobile ) if graph is not showing up
+            </div>
+          </div>
+        
+        
         
         <Foot/>
       </div>
